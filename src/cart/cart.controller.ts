@@ -14,6 +14,7 @@ import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { ChangeStatusDto } from './dto/change-status.dto';
 import { DeleteCartsDto } from './dto/delete-carts.dto';
+import { ChangeQuantityDto  } from './dto/change-quantity.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -91,5 +92,15 @@ export class CartController {
   @ApiResponse({ status: 200, description: 'Carts deleted successfully' })
   deleteMultipleCarts(@Body() deleteCartsDto: DeleteCartsDto, @Request() req) {
     return this.cartService.deleteMultipleCarts(deleteCartsDto, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Admin', 'Employee')
+  @Put('change-quantity')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change item quantity in cart' })
+  @ApiResponse({ status: 200, description: 'Item quantity changed successfully' })
+  changeQuantity(@Body() changeQuantityDto: ChangeQuantityDto) {
+    return this.cartService.changeQuantity(changeQuantityDto);
   }
 }

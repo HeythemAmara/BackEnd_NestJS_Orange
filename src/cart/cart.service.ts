@@ -5,6 +5,7 @@ import { Cart, CartDocument } from '../schemas/cart.schema';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { ChangeStatusDto } from './dto/change-status.dto';
 import { DeleteCartsDto } from './dto/delete-carts.dto';
+import { ChangeQuantityDto  } from './dto/change-quantity.dto';
 
 @Injectable()
 export class CartService {
@@ -61,6 +62,22 @@ export class CartService {
 
     const result = await this.cartModel.deleteMany(condition).exec();
     return { deletedCount: result.deletedCount };
+  }
+
+  async changeQuantity(changeQuantityDto: ChangeQuantityDto): Promise<Cart> {
+    const cart = await this.cartModel.findOne({ reference: changeQuantityDto.reference }).exec();
+    if (!cart) {
+      throw new NotFoundException(`Cart with reference "${changeQuantityDto.reference}" not found`);
+    }
+
+    changeQuantityDto.items.forEach(item => {
+      const cartItem = cart.phones.find(cartItem => cartItem.phone.titre_article === item.titre_article);
+      if (cartItem) {
+        cartItem.quantity = item.quantity;
+      }
+    });
+
+    return cart.save();
   }
 
   private async generateReference(employee: string): Promise<string> {
